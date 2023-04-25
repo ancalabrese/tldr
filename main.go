@@ -16,42 +16,19 @@ var (
 	textHelpMessage string = "-m to set the paragraph to bu summarized"
 	maxLen          *string
 	lenHelpMessage  string = "-l [s,m,l] to set the summary length"
+	kb              *string
+	kbHelpMessage   string = "-kb [filepath] to set a file content as knowledge base"
 )
-
-type FormatterFunc func(string) string
-type MaxTokenConverter func(string) int
-
-func formatInput(suffix string) FormatterFunc {
-	return func(text string) string {
-		return suffix + text
-	}
-}
-
-func setMaxToken(inputTokens *string) MaxTokenConverter {
-	wordCount := len(strings.Split(*inputTokens, " "))
-
-	return func(l string) int {
-		switch l {
-		case "m":
-			return int(0.5 * float32(wordCount))
-		case "l":
-			return int(0.7 * float32(wordCount))
-		case "s":
-		default:
-			return int(0.3 * float32(wordCount))
-		}
-		return 0
-	}
-}
 
 func main() {
 
 	inputTokens = flag.String("m", "", textHelpMessage)
 	maxLen = flag.String("l", "s", lenHelpMessage)
+	kb = flag.String("kb", "", kbHelpMessage)
 	flag.Parse()
 
-	if *inputTokens == "" {
-		log.Fatal("Error missing option:  " + textHelpMessage)
+	if (*inputTokens == "" && *kb == "") || (*inputTokens != "" && *kb != "") {
+		log.Fatal("Error: use -h for help")
 	}
 
 	if !strings.ContainsAny(*maxLen, "sml") {
@@ -62,24 +39,31 @@ func main() {
 	key := os.Getenv("OPENAI_KEY")
 	ctx := context.Background()
 	client := openai.NewClient(key)
-	formatFunc := formatInput("Summarize text:\n")
-	setMaxTokenFunc := setMaxToken(inputTokens)
+	messages := make([]openai.ChatCompletionMessage, 0)
+	messages = append(messages, openai.ChatCompletionMessage{
+		Role:    "system",
+		Content: "Give me the tl;dr",
+	},
+		openai.ChatCompletionMessage{
+			Role:    "user",
+			Content: *inputTokens,
+		})
 
-	req := openai.CompletionRequest{
-		Model:            openai.GPT3TextCurie001,
-		Temperature:      0.7,
-		MaxTokens:        setMaxTokenFunc(*maxLen),
+	req := openai.ChatCompletionRequest{
+		Model:            openai.GPT3Dot5Turbo,
+		Temperature:      0,
+		MaxTokens:        1000,
 		TopP:             1,
 		FrequencyPenalty: 0,
 		PresencePenalty:  1,
-		Prompt:           formatFunc(*inputTokens),
+		Messages:         messages,
+		Stream:           false,
 	}
 
-	resp, err := client.CreateCompletion(ctx, req)
+	resp, err := client.CreateChatCompletion(ctx, req)
 	if err != nil {
 		fmt.Printf("Completion error: %v\n", err)
 		return
 	}
-
-	fmt.Println(resp.Choices[0].Text)
+	fmt.Println(resp.Choices[0].Message.Content)
 }
