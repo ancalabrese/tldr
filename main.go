@@ -3,38 +3,19 @@ package main
 import (
 	"bufio"
 	"context"
-	"flag"
 	"fmt"
-	"log"
 	"os"
-	"strings"
 
+	"github.com/ancalabrese/tldr/cmd"
 	"github.com/sashabaranov/go-openai"
 )
 
 var (
-	inputTokens     *string
-	textHelpMessage string = "-m to set the paragraph to bu summarized"
-	maxLen          *string
-	lenHelpMessage  string = "-l [s,m,l] to set the summary length"
-	kb              *string
-	kbHelpMessage   string = "-kb [filepath] to set a file content as knowledge base"
+	inputTokens string
 )
 
 func main() {
-	inputTokens = flag.String("m", "", textHelpMessage)
-	maxLen = flag.String("l", "s", lenHelpMessage)
-	kb = flag.String("kb", "", kbHelpMessage)
-	flag.Parse()
-
-	if (*inputTokens == "" && *kb == "") || (*inputTokens != "" && *kb != "") {
-		log.Fatal("Error: use -h for help")
-	}
-
-	if !strings.ContainsAny(*maxLen, "sml") {
-		log.Println("Error wrong format: ", lenHelpMessage, "  defaulting to 's'")
-		*maxLen = "s"
-	}
+	cmd.Execute()
 
 	key := os.Getenv("OPENAI_KEY")
 	ctx := context.Background()
@@ -48,7 +29,7 @@ func main() {
 	},
 		openai.ChatCompletionMessage{
 			Role:    "user",
-			Content: *inputTokens,
+			Content: inputTokens,
 		})
 	go sendNewChatMessage(ctx, client, messages, outputChan)
 
