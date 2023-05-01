@@ -2,36 +2,42 @@ package cmd
 
 import (
 	"fmt"
-	"strings"
+	"os"
 
 	"github.com/spf13/cobra"
 )
 
 var (
-	rootCmd *cobra.Command = &cobra.Command{
-		Use:   "tldr [command] [flags]",
+	apiToken string
+	cmd      = &cobra.Command{
+		Use:   "tldr",
 		Short: "Too Long; Didn't read.",
 		Long:  "TL;DR - Summarize any long text and ask any questions for more context.",
-	}
-
-	cmdPath *cobra.Command = &cobra.Command{
-		Use:   "read <file path>",
-		Short: "Read from a file",
-		Long:  "Read a file and set its content as the knowledge base for your queries",
-		Args:  cobra.ExactArgs(1),
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Print: " + strings.Join(args, " "))
+		RunE: func(cmd *cobra.Command, args []string) error {
+			fmt.Println(args)
+			return nil
 		},
 	}
-
-	token string
 )
 
-func Execute() error {
-	return rootCmd.Execute()
-}
+const (
+	flagName      string = "token"
+	flagShortName string = "t"
+)
 
 func init() {
-	rootCmd.AddCommand(cmdPath)
-	rootCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "<API_TOKEN> Set the OpenAI API token")
+	cobra.OnInitialize(initConfigFunc)
+
+	cmd.PersistentFlags().StringVarP(&apiToken, flagName, flagShortName, "", "<API_TOKEN> Set the OpenAI API token")
+}
+
+func Execute() error {
+	return cmd.Execute()
+}
+
+func initConfigFunc() {
+	if present := cmd.PersistentFlags().Changed(flagName); !present {
+		key := os.Getenv("OPENAI_KEY")
+		_ = cmd.PersistentFlags().Set(flagName, key)
+	}
 }

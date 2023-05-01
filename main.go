@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/ancalabrese/tldr/cmd"
@@ -15,7 +16,10 @@ var (
 )
 
 func main() {
-	cmd.Execute()
+	err := cmd.Execute()
+	if err != nil {
+		log.Fatal("Err: ", err)
+	}
 
 	key := os.Getenv("OPENAI_KEY")
 	ctx := context.Background()
