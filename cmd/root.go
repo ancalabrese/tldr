@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -14,7 +13,6 @@ var (
 		Short: "Too Long; Didn't read.",
 		Long:  "TL;DR - Summarize any long text and ask any questions for more context.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fmt.Println(args)
 			return nil
 		},
 	}
@@ -38,6 +36,6 @@ func Execute() error {
 func initConfigFunc() {
 	if present := cmd.PersistentFlags().Changed(flagName); !present {
 		key := os.Getenv("OPENAI_KEY")
-		_ = cmd.PersistentFlags().Set(flagName, key)
+		cmd.PersistentFlags().Set(flagName, key)
 	}
 }
