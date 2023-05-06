@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/ancalabrese/tldr/pkg/cmdutil"
+	"github.com/sashabaranov/go-openai"
 	"github.com/spf13/cobra"
 )
 
@@ -19,8 +20,6 @@ const (
 
 func init() {
 	cobra.OnInitialize(initConfigFunc)
-
-	cmd.PersistentFlags().StringVarP(&apiToken, flagName, flagShortName, "", "<API_TOKEN> Set the OpenAI API token")
 }
 
 func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
@@ -28,15 +27,13 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 		Use:   "tldr",
 		Short: "Too Long; Didn't read.",
 		Long:  "TL;DR - Summarize any long text and ask any questions for more context.",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return nil
+		Run: func(cmd *cobra.Command, args []string) {
+			f.Llm = openai.NewClient(apiToken)
 		},
 	}
-	return cmd
-}
+	cmd.PersistentFlags().StringVarP(&apiToken, flagName, flagShortName, "", "<API_TOKEN> Set the OpenAI API token")
 
-func Execute() error {
-	return cmd.Execute()
+	return cmd
 }
 
 func initConfigFunc() {

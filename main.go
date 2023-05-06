@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/ancalabrese/tldr/cmd"
+	"github.com/ancalabrese/tldr/pkg/factory"
 	"github.com/sashabaranov/go-openai"
 )
 
@@ -16,16 +17,15 @@ var (
 )
 
 func main() {
-	err := cmd.Execute()
+	factory := factory.Defaults()
+	err := cmd.NewRootCmd(factory).Execute()
 	if err != nil {
-		log.Fatal("Err: ", err)
+		log.Fatal(err)
 	}
 
-	key := os.Getenv("OPENAI_KEY")
 	ctx := context.Background()
 	inputChan := make(chan string, 1)
 	outputChan := make(chan openai.ChatCompletionResponse, 1)
-	client := openai.NewClient(key)
 	messages := make([]openai.ChatCompletionMessage, 0)
 	messages = append(messages, openai.ChatCompletionMessage{
 		Role:    "system",
@@ -35,7 +35,7 @@ func main() {
 			Role:    "user",
 			Content: inputTokens,
 		})
-	go sendNewChatMessage(ctx, client, messages, outputChan)
+	go sendNewChatMessage(ctx, factory.Llm, messages, outputChan)
 
 	go func() {
 		for {
@@ -48,7 +48,7 @@ func main() {
 						Role:    "user",
 						Content: msg,
 					})
-					go sendNewChatMessage(ctx, client, messages, outputChan)
+					go sendNewChatMessage(ctx, factory.Llm, messages, outputChan)
 				}
 			case resp := <-outputChan:
 				{
