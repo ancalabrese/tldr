@@ -8,6 +8,8 @@ import (
 	"os"
 
 	"github.com/ancalabrese/tldr/cmd"
+	"github.com/ancalabrese/tldr/pkg/cmdutil"
+	"github.com/ancalabrese/tldr/pkg/conversation"
 	"github.com/ancalabrese/tldr/pkg/factory"
 	"github.com/sashabaranov/go-openai"
 )
@@ -26,16 +28,8 @@ func main() {
 	ctx := context.Background()
 	inputChan := make(chan string, 1)
 	outputChan := make(chan openai.ChatCompletionResponse, 1)
-	messages := make([]openai.ChatCompletionMessage, 0)
-	messages = append(messages, openai.ChatCompletionMessage{
-		Role:    "system",
-		Content: "Create a summary for the provided text. Then answer any user questions about it.",
-	},
-		openai.ChatCompletionMessage{
-			Role:    "user",
-			Content: inputTokens,
-		})
-	go sendNewChatMessage(ctx, factory.Llm, messages, outputChan)
+	convo := conversation.New(cmdutil.Tldr)
+	go sendNewChatMessage(ctx, factory.Llm, convo, outputChan)
 
 	go func() {
 		for {
@@ -44,19 +38,15 @@ func main() {
 				return
 			case msg := <-inputChan:
 				{
-					messages := append(messages, openai.ChatCompletionMessage{
-						Role:    "user",
-						Content: msg,
-					})
-					go sendNewChatMessage(ctx, factory.Llm, messages, outputChan)
+					convo.AddRequest(msg)
+					go sendNewChatMessage(ctx, factory.Llm, convo, outputChan)
+
 				}
 			case resp := <-outputChan:
 				{
 					go printResponse(resp)
-					messages = append(messages, openai.ChatCompletionMessage{
-						Role:    "assistant",
-						Content: resp.Choices[0].Message.Content,
-					})
+					convo.AddResponse(resp.Choices[0].Message.Content)
+
 				}
 			}
 		}
@@ -70,7 +60,8 @@ func main() {
 	}
 }
 
-func sendNewChatMessage(ctx context.Context, llm *openai.Client, chatMessages []openai.ChatCompletionMessage, responseChan chan (openai.ChatCompletionResponse)) {
+func sendNewChatMessage(ctx context.Context, llm *openai.Client, conversation *conversation.Conversation,
+	responseChan chan (openai.ChatCompletionResponse)) {
 	req := openai.ChatCompletionRequest{
 		Model:            openai.GPT3Dot5Turbo0301,
 		Temperature:      0,
@@ -78,7 +69,7 @@ func sendNewChatMessage(ctx context.Context, llm *openai.Client, chatMessages []
 		TopP:             1,
 		FrequencyPenalty: 0,
 		PresencePenalty:  1,
-		Messages:         chatMessages,
+		Messages:         conversation.History,
 	}
 
 	resp, err := llm.CreateChatCompletion(ctx, req)
