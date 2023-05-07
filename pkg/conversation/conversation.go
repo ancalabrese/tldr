@@ -9,11 +9,9 @@ type Conversation struct {
 	History []openai.ChatCompletionMessage
 }
 
-var (
-	command string
-)
-
 func New(mode cmdutil.Mode) *Conversation {
+	command := ""
+
 	switch mode {
 	case cmdutil.Interactive:
 		command = "Create a summary for the provided text. Then answer any user questions about it."

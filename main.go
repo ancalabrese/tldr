@@ -8,7 +8,6 @@ import (
 	"os"
 
 	"github.com/ancalabrese/tldr/cmd"
-	"github.com/ancalabrese/tldr/pkg/cmdutil"
 	"github.com/ancalabrese/tldr/pkg/conversation"
 	"github.com/ancalabrese/tldr/pkg/factory"
 	"github.com/sashabaranov/go-openai"
@@ -24,7 +23,7 @@ func main() {
 	ctx := context.Background()
 	inputChan := make(chan string, 1)
 	outputChan := make(chan openai.ChatCompletionResponse, 1)
-	convo := conversation.New(cmdutil.Tldr)
+	convo := conversation.New(factory.ConversationMode)
 
 	go sendNewChatMessage(ctx, factory.Llm, convo, outputChan)
 
