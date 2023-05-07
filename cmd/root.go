@@ -10,12 +10,15 @@ import (
 
 var (
 	apiToken string
+	mode     string
 	cmd      *cobra.Command
 )
 
 const (
-	flagName      string = "token"
-	flagShortName string = "t"
+	tokenFlagName      string = "token"
+	tokenFlagShortName string = "t"
+	modeFlagName       string = "mode"
+	modeFlagShortName  string = "m"
 )
 
 func init() {
@@ -27,18 +30,23 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 		Use:   "tldr",
 		Short: "Too Long; Didn't read.",
 		Long:  "TL;DR - Summarize any long text and ask any questions for more context.",
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			_, err := cmdutil.WhichMode(mode)
+			return err
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			f.Llm = openai.NewClient(apiToken)
 		},
 	}
-	cmd.PersistentFlags().StringVarP(&apiToken, flagName, flagShortName, "", "<API_TOKEN> Set the OpenAI API token")
+	cmd.PersistentFlags().StringVarP(&apiToken, tokenFlagName, tokenFlagShortName, "", "<API_TOKEN> Set the OpenAI API token")
+	cmd.PersistentFlags().StringVarP(&mode, modeFlagName, modeFlagShortName, "TLDR", "[TLDR, INTERACTIVE] select the chat mode.")
 
 	return cmd
 }
 
 func initConfigFunc() {
-	if present := cmd.PersistentFlags().Changed(flagName); !present {
+	if present := cmd.PersistentFlags().Changed(tokenFlagName); !present {
 		key := os.Getenv("OPENAI_KEY")
-		_ = cmd.PersistentFlags().Set(flagName, key)
+		_ = cmd.PersistentFlags().Set(tokenFlagName, key)
 	}
 }
