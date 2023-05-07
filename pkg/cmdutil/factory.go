@@ -5,7 +5,8 @@ import (
 )
 
 type Factory struct {
-	Llm *openai.Client
+	Llm              *openai.Client
+	ConversationMode Mode
 
 	ExecutableName string
 }

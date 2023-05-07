@@ -36,6 +36,9 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			f.Llm = openai.NewClient(apiToken)
+			//Ignoring error. Was checked in PersistentPreRun
+			m, _ := cmdutil.WhichMode(mode)
+			f.ConversationMode = m
 		},
 	}
 	cmd.PersistentFlags().StringVarP(&apiToken, tokenFlagName, tokenFlagShortName, "", "<API_TOKEN> Set the OpenAI API token")

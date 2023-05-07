@@ -14,10 +14,6 @@ import (
 	"github.com/sashabaranov/go-openai"
 )
 
-var (
-	inputTokens string
-)
-
 func main() {
 	factory := factory.Defaults()
 	err := cmd.NewRootCmd(factory).Execute()
@@ -29,6 +25,7 @@ func main() {
 	inputChan := make(chan string, 1)
 	outputChan := make(chan openai.ChatCompletionResponse, 1)
 	convo := conversation.New(cmdutil.Tldr)
+
 	go sendNewChatMessage(ctx, factory.Llm, convo, outputChan)
 
 	go func() {
