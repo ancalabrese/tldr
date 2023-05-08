@@ -19,12 +19,12 @@ type RelatedEmbedding struct {
 	Query          string
 }
 
-func CalculateKbEmbeddings(ctx context.Context, llm openai.Client) error {
+func CalculateKbEmbeddings(ctx context.Context, llm openai.Client) ([]openai.Embedding, error) {
 	//TODO:
 	// 1. read KB file
 	// 2. calculate embeddings and save in csv
 	// 3. update kb
-	return nil
+	return nil, nil
 }
 
 func ParseEmbeddings(r io.Reader) ([]openai.Embedding, error) {
