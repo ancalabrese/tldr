@@ -14,9 +14,8 @@ import (
 )
 
 type Kb struct {
-	uri               *url.URL
-	Embeddings        []openai.Embedding
-	embeddingFilePath string
+	uri        *url.URL
+	Embeddings []openai.Embedding
 }
 
 func New(ctx context.Context, uri *url.URL, llm openai.Client) (*Kb, error) {
