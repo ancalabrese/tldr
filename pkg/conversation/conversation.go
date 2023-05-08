@@ -7,9 +7,10 @@ import (
 
 type Convo struct {
 	History []openai.ChatCompletionMessage
+	kb      string
 }
 
-func New(mode cmdutil.Mode) *Convo {
+func New(mode cmdutil.Mode, kbUri string) *Convo {
 	command := ""
 
 	switch mode {
@@ -28,6 +29,7 @@ func New(mode cmdutil.Mode) *Convo {
 
 	return &Convo{
 		History: history,
+		kb:      kbUri,
 	}
 }
 

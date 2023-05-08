@@ -25,7 +25,7 @@ func NewReadCmd(f *cmdutil.Factory) *cobra.Command {
 			if err != nil {
 				return err
 			}
-
+			//TODO: open URI and set KB path in config then return
 			return nil
 		},
 	}

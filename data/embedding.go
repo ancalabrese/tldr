@@ -13,16 +13,22 @@ import (
 
 type DistanceFunc func(embeddingsA []float32, embeddingsB []float32) float32
 
-type Embedding openai.Embedding
-
 type RelatedEmbedding struct {
-	Embedding      Embedding
+	Embedding      openai.Embedding
 	RelevanceScore float32
 	Query          string
 }
 
-func GetKbEmbeddings(r io.Reader) ([]Embedding, error) {
-	kbEmbeddings := make([]Embedding, 0)
+func CalculateKbEmbeddings(ctx context.Context, llm openai.Client) error {
+	//TODO:
+	// 1. read KB file
+	// 2. calculate embeddings and save in csv
+	// 3. update kb
+	return nil
+}
+
+func ParseEmbeddings(r io.Reader) ([]openai.Embedding, error) {
+	kbEmbeddings := make([]openai.Embedding, 0)
 	kb, err := codecs.CsvReaderFunc(r)
 	if err != nil {
 		return nil, err
@@ -40,7 +46,7 @@ func GetKbEmbeddings(r io.Reader) ([]Embedding, error) {
 			convertedEmbeddings = append(convertedEmbeddings, float32(convertedVal))
 		}
 
-		kbEmbeddings = append(kbEmbeddings, Embedding{
+		kbEmbeddings = append(kbEmbeddings, openai.Embedding{
 			Object:    entry[0],
 			Embedding: convertedEmbeddings,
 		})
@@ -48,7 +54,7 @@ func GetKbEmbeddings(r io.Reader) ([]Embedding, error) {
 	return kbEmbeddings, err
 }
 
-func GetQueryEmbedding(ctx context.Context, q string, llm openai.Client) (Embedding, error) {
+func GetQueryEmbedding(ctx context.Context, q string, llm openai.Client) (openai.Embedding, error) {
 	queryEmbeddingReq := openai.EmbeddingRequest{
 		Input: []string{q},
 		Model: openai.AdaEmbeddingV2,
@@ -56,10 +62,10 @@ func GetQueryEmbedding(ctx context.Context, q string, llm openai.Client) (Embedd
 
 	queryEmbeddingRes, err := llm.CreateEmbeddings(ctx, queryEmbeddingReq)
 	if err != nil {
-		return Embedding{}, err
+		return openai.Embedding{}, err
 	}
 
-	return Embedding{
+	return openai.Embedding{
 		Object:    queryEmbeddingRes.Object,
 		Embedding: queryEmbeddingRes.Data[0].Embedding,
 	}, nil
@@ -67,8 +73,8 @@ func GetQueryEmbedding(ctx context.Context, q string, llm openai.Client) (Embedd
 
 func RankEmbeddingsByRelatedness(
 	llm openai.Client,
-	kbEmbeddings []Embedding,
-	queryEmbedding Embedding,
+	kbEmbeddings []openai.Embedding,
+	queryEmbedding openai.Embedding,
 	distanceFunc DistanceFunc,
 	maxResults int,
 	ctx context.Context) []RelatedEmbedding {
