@@ -2,15 +2,16 @@ package conversation
 
 import (
 	"github.com/ancalabrese/tldr/pkg/cmdutil"
+	"github.com/ancalabrese/tldr/pkg/kb"
 	"github.com/sashabaranov/go-openai"
 )
 
 type Convo struct {
 	History []openai.ChatCompletionMessage
-	kb      string
+	Kb      *kb.Kb
 }
 
-func New(mode cmdutil.Mode, kbUri string) *Convo {
+func New(mode cmdutil.Mode) *Convo {
 	command := ""
 
 	switch mode {
@@ -29,7 +30,6 @@ func New(mode cmdutil.Mode, kbUri string) *Convo {
 
 	return &Convo{
 		History: history,
-		kb:      kbUri,
 	}
 }
 

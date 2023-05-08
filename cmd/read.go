@@ -2,13 +2,16 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"net/url"
+	"strings"
 
-	"github.com/ancalabrese/tldr/pkg/cmdutil"
+	"github.com/ancalabrese/tldr/pkg/conversation"
+	"github.com/ancalabrese/tldr/pkg/kb"
 	"github.com/spf13/cobra"
 )
 
-func NewReadCmd(f *cmdutil.Factory) *cobra.Command {
+func NewReadCmd(c *conversation.Convo) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "read [uri]",
 		Short: "Read content from source",
@@ -21,11 +24,15 @@ func NewReadCmd(f *cmdutil.Factory) *cobra.Command {
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			_, err := url.Parse(args[0])
+			uri, err := url.Parse(args[0])
 			if err != nil {
 				return err
 			}
-			//TODO: open URI and set KB path in config then return
+			if !strings.Contains(uri.Scheme, "file") || !strings.Contains(uri.Scheme, "http") {
+				return fmt.Errorf("URI not supported: %s", uri.String())
+			}
+
+			c.Kb = kb.New(*uri)
 			return nil
 		},
 	}

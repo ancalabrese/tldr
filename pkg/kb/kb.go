@@ -9,12 +9,12 @@ import (
 )
 
 type Kb struct {
-	uri               url.URL
+	uri               *url.URL
 	Embeddings        []openai.Embedding
 	embeddingFilePath string
 }
 
-func New(uri url.URL) *Kb {
+func New(uri *url.URL) *Kb {
 	return &Kb{
 		uri: uri,
 	}
