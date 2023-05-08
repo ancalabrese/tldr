@@ -5,11 +5,11 @@ import (
 	"github.com/sashabaranov/go-openai"
 )
 
-type Conversation struct {
+type Convo struct {
 	History []openai.ChatCompletionMessage
 }
 
-func New(mode cmdutil.Mode) *Conversation {
+func New(mode cmdutil.Mode) *Convo {
 	command := ""
 
 	switch mode {
@@ -26,19 +26,19 @@ func New(mode cmdutil.Mode) *Conversation {
 		Content: command,
 	}
 
-	return &Conversation{
+	return &Convo{
 		History: history,
 	}
 }
 
-func (c *Conversation) AddResponse(resp string) {
+func (c *Convo) AddResponse(resp string) {
 	c.History = append(c.History, openai.ChatCompletionMessage{
 		Role:    "assistant",
 		Content: resp,
 	})
 }
 
-func (c *Conversation) AddRequest(req string) {
+func (c *Convo) AddRequest(req string) {
 	c.History = append(c.History, openai.ChatCompletionMessage{
 		Role:    "user",
 		Content: req,

@@ -56,7 +56,7 @@ func main() {
 	}
 }
 
-func sendNewChatMessage(ctx context.Context, llm *openai.Client, conversation *conversation.Conversation,
+func sendNewChatMessage(ctx context.Context, llm *openai.Client, conversation *conversation.Convo,
 	responseChan chan (openai.ChatCompletionResponse)) {
 	req := openai.ChatCompletionRequest{
 		Model:            openai.GPT3Dot5Turbo0301,

@@ -44,6 +44,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.PersistentFlags().StringVarP(&apiToken, tokenFlagName, tokenFlagShortName, "", "<API_TOKEN> Set the OpenAI API token")
 	cmd.PersistentFlags().StringVarP(&mode, modeFlagName, modeFlagShortName, "TLDR", "[TLDR, INTERACTIVE] select the chat mode.")
 
+	cmd.AddCommand(NewReadCmd(f))
 	return cmd
 }
 
