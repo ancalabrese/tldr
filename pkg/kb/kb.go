@@ -28,7 +28,7 @@ func New(ctx context.Context, uri *url.URL, llm openai.Client) (*Kb, error) {
 		return nil, err
 	}
 
-	emb, err := data.CalculateKbEmbeddings(ctx, content, llm)
+	emb, err := data.GetEmbeddings(ctx, content, llm)
 	if err != nil {
 		return nil, fmt.Errorf("couldn't get kb embeddings: %w", err)
 	}

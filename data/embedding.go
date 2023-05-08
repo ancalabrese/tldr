@@ -19,14 +19,6 @@ type RelatedEmbedding struct {
 	Query          string
 }
 
-func CalculateKbEmbeddings(ctx context.Context, llm openai.Client) ([]openai.Embedding, error) {
-	//TODO:
-	// 1. read KB file
-	// 2. calculate embeddings and save in csv
-	// 3. update kb
-	return nil, nil
-}
-
 func ParseEmbeddings(r io.Reader) ([]openai.Embedding, error) {
 	kbEmbeddings := make([]openai.Embedding, 0)
 	kb, err := codecs.CsvReaderFunc(r)
@@ -54,21 +46,17 @@ func ParseEmbeddings(r io.Reader) ([]openai.Embedding, error) {
 	return kbEmbeddings, err
 }
 
-func GetQueryEmbedding(ctx context.Context, q string, llm openai.Client) (openai.Embedding, error) {
+func GetEmbeddings(ctx context.Context, text []string, llm openai.Client) ([]openai.Embedding, error) {
 	queryEmbeddingReq := openai.EmbeddingRequest{
-		Input: []string{q},
+		Input: text,
 		Model: openai.AdaEmbeddingV2,
 	}
 
 	queryEmbeddingRes, err := llm.CreateEmbeddings(ctx, queryEmbeddingReq)
 	if err != nil {
-		return openai.Embedding{}, err
+		return nil, err
 	}
-
-	return openai.Embedding{
-		Object:    queryEmbeddingRes.Object,
-		Embedding: queryEmbeddingRes.Data[0].Embedding,
-	}, nil
+	return queryEmbeddingRes.Data, nil
 }
 
 func RankEmbeddingsByRelatedness(

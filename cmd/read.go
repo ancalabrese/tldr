@@ -32,7 +32,7 @@ func NewReadCmd(c *conversation.Convo) *cobra.Command {
 				return fmt.Errorf("URI not supported: %s", uri.String())
 			}
 
-			c.Kb = kb.New(*uri)
+			c.Kb = kb.New(uri)
 			return nil
 		},
 	}
