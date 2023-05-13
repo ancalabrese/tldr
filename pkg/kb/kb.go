@@ -40,26 +40,21 @@ func (kb *Kb) Parse(ctx context.Context, llm *openai.Client) error {
 	return nil
 }
 
-func (kb *Kb) GetKbReader() (io.ReadCloser, error) {
-	fp := kb.uri.Path
-	return os.Open(fp)
-}
-
 func (kb *Kb) GetKb() (io.ReadWriteCloser, error) {
 	fp := kb.uri.Path
 	return os.OpenFile(fp, os.O_RDWR, 0)
 }
 
 func (kb *Kb) parseContent() ([]string, error) {
-
-	r, err := kb.GetKbReader()
+	fd, err := os.Open(kb.uri.Path)
 	if err != nil {
-		return nil, fmt.Errorf("kb content parsing failed: %w", err)
+		return nil, fmt.Errorf("couldn't parse kb: %w", err)
 	}
-	defer r.Close()
+	defer fd.Close()
 
 	content := make([]string, 0)
-	scanner := bufio.NewScanner(r)
+	scanner := bufio.NewScanner(fd)
+
 	for scanner.Scan() {
 		content = append(content, scanner.Text())
 	}
