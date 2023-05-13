@@ -11,7 +11,7 @@ type Convo struct {
 	Kb      *kb.Kb
 }
 
-func New(mode cmdutil.Mode) *Convo {
+func New(mode cmdutil.Mode, kb *kb.Kb) *Convo {
 	command := ""
 
 	switch mode {

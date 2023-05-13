@@ -14,16 +14,16 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
 	factory := factory.Defaults()
 	err := cmd.NewRootCmd(factory).Execute()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ctx := context.Background()
 	inputChan := make(chan string, 1)
 	outputChan := make(chan openai.ChatCompletionResponse, 1)
-	convo := conversation.New(factory.ConversationMode)
+	convo := conversation.New(factory.ConversationMode, factory.Kb)
 
 	go sendNewChatMessage(ctx, factory.Llm, convo, outputChan)
 

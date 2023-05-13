@@ -6,12 +6,12 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/ancalabrese/tldr/pkg/conversation"
+	"github.com/ancalabrese/tldr/pkg/cmdutil"
 	"github.com/ancalabrese/tldr/pkg/kb"
 	"github.com/spf13/cobra"
 )
 
-func NewReadCmd(c *conversation.Convo) *cobra.Command {
+func NewReadCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "read [uri]",
 		Short: "Read content from source",
@@ -32,7 +32,7 @@ func NewReadCmd(c *conversation.Convo) *cobra.Command {
 				return fmt.Errorf("URI not supported: %s", uri.String())
 			}
 
-			c.Kb = kb.New(uri)
+			f.Kb = kb.New(uri)
 			return nil
 		},
 	}

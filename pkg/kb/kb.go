@@ -18,22 +18,26 @@ type Kb struct {
 	Embeddings []openai.Embedding
 }
 
-func New(ctx context.Context, uri *url.URL, llm openai.Client) (*Kb, error) {
+func New(uri *url.URL) *Kb {
 	kb := &Kb{
 		uri: uri,
 	}
+	return kb
+}
+
+func (kb *Kb) Parse(ctx context.Context, llm *openai.Client) error {
 	content, err := kb.parseContent()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	emb, err := data.GetEmbeddings(ctx, content, llm)
 	if err != nil {
-		return nil, fmt.Errorf("couldn't get kb embeddings: %w", err)
+		return fmt.Errorf("couldn't get kb embeddings: %w", err)
 	}
 
 	kb.Embeddings = emb
-	return kb, nil
+	return nil
 }
 
 func (kb *Kb) GetKbReader() (io.ReadCloser, error) {

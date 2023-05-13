@@ -46,7 +46,7 @@ func ParseEmbeddings(r io.Reader) ([]openai.Embedding, error) {
 	return kbEmbeddings, err
 }
 
-func GetEmbeddings(ctx context.Context, text []string, llm openai.Client) ([]openai.Embedding, error) {
+func GetEmbeddings(ctx context.Context, text []string, llm *openai.Client) ([]openai.Embedding, error) {
 	queryEmbeddingReq := openai.EmbeddingRequest{
 		Input: text,
 		Model: openai.AdaEmbeddingV2,
