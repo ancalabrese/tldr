@@ -1,6 +1,9 @@
 package conversation
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/ancalabrese/tldr/pkg/cmdutil"
 	"github.com/ancalabrese/tldr/pkg/kb"
 	"github.com/sashabaranov/go-openai"
@@ -11,7 +14,7 @@ type Convo struct {
 	Kb      *kb.Kb
 }
 
-func New(mode cmdutil.Mode, kb *kb.Kb) *Convo {
+func New(mode cmdutil.Mode, kb *kb.Kb) (*Convo, error) {
 	command := ""
 
 	switch mode {
@@ -27,10 +30,20 @@ func New(mode cmdutil.Mode, kb *kb.Kb) *Convo {
 		Role:    "system",
 		Content: command,
 	}
+	kbContent, err := kb.Parse()
+	if err != nil {
+		return nil, fmt.Errorf("can't initiate new conversation: %w", err)
+	}
+
+	history = append(history, openai.ChatCompletionMessage{
+		Role:    "user",
+		Content: strings.Join(kbContent, "\n"),
+	})
 
 	return &Convo{
 		History: history,
-	}
+		Kb:      kb,
+	}, nil
 }
 
 func (c *Convo) AddResponse(resp string) {

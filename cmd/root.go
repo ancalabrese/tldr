@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"os"
 
 	"github.com/ancalabrese/tldr/pkg/cmdutil"
@@ -18,7 +19,7 @@ const (
 	tokenFlagName      string = "token"
 	tokenFlagShortName string = "t"
 	modeFlagName       string = "mode"
-	modeFlagShortName  string = "m"
+	modeFlagShortName  string = "M"
 )
 
 func init() {
@@ -30,15 +31,18 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 		Use:   "tldr",
 		Short: "Too Long; Didn't read.",
 		Long:  "TL;DR - Summarize any long text and ask any questions for more context.",
-		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			_, err := cmdutil.WhichMode(mode)
-			return err
-		},
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) == 0 {
+				return errors.New("no valid command")
+			}
+
 			f.Llm = openai.NewClient(apiToken)
-			//Ignoring error. Was checked in PersistentPreRun
-			m, _ := cmdutil.WhichMode(mode)
+			m, err := cmdutil.WhichMode(mode)
+			if err != nil {
+				return err
+			}
 			f.ConversationMode = m
+			return nil
 		},
 	}
 	cmd.PersistentFlags().StringVarP(&apiToken, tokenFlagName, tokenFlagShortName, "", "<API_TOKEN> Set the OpenAI API token")

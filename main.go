@@ -23,7 +23,11 @@ func main() {
 
 	inputChan := make(chan string, 1)
 	outputChan := make(chan openai.ChatCompletionResponse, 1)
-	convo := conversation.New(factory.ConversationMode, factory.Kb)
+
+	convo, err := conversation.New(factory.ConversationMode, factory.Kb)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	go sendNewChatMessage(ctx, factory.Llm, convo, outputChan)
 

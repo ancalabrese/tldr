@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/ancalabrese/tldr/data"
 	"github.com/sashabaranov/go-openai"
 )
 
@@ -25,18 +24,21 @@ func New(uri *url.URL) *Kb {
 	return kb
 }
 
-func (kb *Kb) Parse(ctx context.Context, llm *openai.Client) error {
+func (kb *Kb) Parse() ([]string, error) {
 	content, err := kb.parseContent()
 	if err != nil {
-		return err
+		return nil, err
 	}
+	return content, nil
+}
 
-	emb, err := data.GetEmbeddings(ctx, content, llm)
-	if err != nil {
-		return fmt.Errorf("couldn't get kb embeddings: %w", err)
-	}
+func getEmbeddings(ctx context.Context) error {
+	//emb, err := data.GetEmbeddings(ctx, content, llm)
+	//if err != nil {
+	//	return fmt.Errorf("couldn't get kb embeddings: %w", err)
+	//}
 
-	kb.Embeddings = emb
+	//kb.Embeddings = emb
 	return nil
 }
 
